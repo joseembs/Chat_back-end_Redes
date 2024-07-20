@@ -30,9 +30,9 @@ def getJson():  # put application's code here
     if(payload['pedido'] == "login"):
         file = open("emails.txt", 'r')
         if(payload['email'] in file.read()):
-            print("existe")
+            payload['cadastrado'] = True
         else:
-            print("nao")
+            payload['cadastrado'] = False
         file.close()
 
     # payload['pedido'] = pedido
