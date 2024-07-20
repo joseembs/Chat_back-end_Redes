@@ -21,6 +21,20 @@ def getJson():  # put application's code here
     if('mensagem' in request.args != None):
         payload['mensagem'] = str(request.args['mensagem'])
 
+    if(payload['pedido'] == "cadastro"):
+        #if("@gmail.com" in payload['email']): (a gente vai validar o email???)
+        file = open("emails.txt", "a")
+        file.write(f"{payload['email']}\n")
+        file.close()
+    
+    if(payload['pedido'] == "login"):
+        file = open("emails.txt", 'r')
+        if(payload['email'] in file.read()):
+            print("existe")
+        else:
+            print("nao")
+        file.close()
+
     # payload['pedido'] = pedido
     # payload['email'] = email
     # payload['mensagem'] = mensagem
