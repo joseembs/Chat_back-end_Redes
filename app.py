@@ -5,11 +5,12 @@ import ExemploIRC as IRC
 
 app = Flask(__name__)
 
+def remove_email_suffix(email):
+    aux = email
+    aux.replace('@', '')
+    return aux.replace('.', '')
 
 @app.route('/api', methods=['GET'])
-# @app.route('/<pedido>', defaults={'email': None, 'mensagem': None})
-# @app.route('/<pedido>/<email>/<mensagem>')
-# def getJson(pedido, email = None, mensagem = None):
 def getJson():  # put application's code here
     payload={}
 
@@ -26,6 +27,11 @@ def getJson():  # put application's code here
         file = open("emails.txt", "a")
         file.write(f"{payload['email']}\n")
         file.close()
+
+        aux = remove_email_suffix(payload["email"])
+        file = open(f"{aux}.txt", "a")
+        file.write(f"{payload['email']}\n")
+        file.close()
     
     if(payload['pedido'] == "login"):
         file = open("emails.txt", 'r')
@@ -34,10 +40,6 @@ def getJson():  # put application's code here
         else:
             payload['cadastrado'] = False
         file.close()
-
-    # payload['pedido'] = pedido
-    # payload['email'] = email
-    # payload['mensagem'] = mensagem
 
     print(payload)
 
