@@ -1,10 +1,13 @@
 from flask import Flask, request, jsonify
 
+
 from CriaProcessos import main
 import ExemploIRC as IRC
 
 app = Flask(__name__)
-
+def remove_gmail_suffix(email):
+    aux = email
+    return aux.replace('@gmail.com', '')
 
 @app.route('/api', methods=['GET'])
 # @app.route('/<pedido>', defaults={'email': None, 'mensagem': None})
@@ -38,6 +41,15 @@ def getJson():  # put application's code here
     # payload['pedido'] = pedido
     # payload['email'] = email
     # payload['mensagem'] = mensagem
+    if(payload["pedido"] == "cadastro"):
+        aux = remove_gmail_suffix(payload["email"])
+        file = open(f"{aux}.txt", "a")
+        file.write(f"{payload["email"]}\n")
+        file.write(f"{payload["mensagem"]}\n")
+        file.close()
+        
+
+        
 
     print(payload)
 
