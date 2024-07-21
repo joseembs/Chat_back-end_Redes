@@ -41,6 +41,15 @@ def getJson():  # put application's code here
             payload['cadastrado'] = False
         file.close()
 
+    if(payload['pedido'] == "atualizar"):
+        file = open("emails.txt", 'r')
+        payload['allUsers'] = []
+        for email in file.read().split():
+            payload['allUsers'].append(email)
+        payload['allUsers'].sort()
+        file.close()
+        print(payload['allUsers'])
+
     print(payload)
 
     if(payload['pedido'] == "sendMsg"):
