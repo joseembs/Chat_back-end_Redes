@@ -177,5 +177,5 @@ def getJson(jsonIn:json):
 
     return json.dumps(response)
 
-"""dicionario = {"pedido":"sendDM", "email":"a@gmail.com", "mensagem":"ola grupo", "destinatario":"b@gmail.com"} # teste
-print(getJson(json.dumps(dicionario)))"""
+dicionario = {"pedido":"sendMsg", "email":"a@gmail.com", "mensagem":"ola grupo", "nome":"grupo legal"} # teste
+print(getJson(json.dumps(dicionario)))
