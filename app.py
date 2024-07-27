@@ -24,6 +24,11 @@ import re
 # app = Flask(__name__)
 
 # @app.route('/api', methods=['GET'])
+
+def formata(string):
+    return re.sub(r"\W", "", string)
+
+
 def getJson(jsonIn:json):
     payload = json.loads(jsonIn)
     response = {}
@@ -32,72 +37,123 @@ def getJson(jsonIn:json):
 
         case "cadastro":
             if re.search(r"\w.*@\w+\.\w+", payload['email']):
-                file = open("emails.txt", "a")
-                file.write(f"{payload['email']}\n")
-                file.close()
-                
-                file = open("chats.txt", "a")
-                file.write(f"{payload['email']}\n")
-                file.close()
+                try:
+                    file = open("users.json", 'r')
+                    aux = json.load(file)
+                    file.close()
 
-                response['cadastrado'] = True
+                except:
+                    aux = {}
+                
+                if(payload['email'] not in aux.keys()):
+                    aux[payload['email']] = {"nome" : payload['nome'], "local" : payload['local']}
+                    file = open("users.json", 'w')
+                    file.write(json.dumps(aux))
+                    file.close()
+                    
+                    file = open("chats.txt", 'a')
+                    file.write(f"{payload['email']}\n")
+                    file.close()
+
+                    response['cadastrado'] = True
+                else:
+                    response['cadastrado'] = False
 
             else:
                 response['cadastrado'] = False
-
-            ## ! cadastrar nome e local do usuário
     
         case "login":
-            file = open("emails.txt", 'r')
+            file = open("users.json", 'r')
             if(payload['email'] in file.read()):
-                payload['cadastrado'] = True
+                response['cadastrado'] = True
             else:
-                payload['cadastrado'] = False
+                response['cadastrado'] = False
             file.close()
 
         case "atualizar":
-            file = open("chats.txt", 'r')
-            payload['allUsers'] = []
-            for email in file.read().split():
-                payload['allUsers'].append(email)
-            payload['allUsers'].sort()
-            file.close()
-            # print(payload['allUsers'])
-            # print(payload)
+            file1 = open("chats.txt", 'r')
+            file2 = open("users.json", 'r')
+            aux = json.load(file2)
+            file2.close()
+
+            response['allUsers'] = []
+            response['allGroups'] = []
+
+            for email in file1.read().split("\n"):
+                if(email != ""):
+                    if(email in aux.keys()):
+                        response['allUsers'].append(email)
+                    else:
+                        response['allGroups'].append(email)
+            response['allUsers'].sort()
+            response['allGroups'].sort()
+            file1.close()
 
         case "criaGrupo":
-            file = open("chats.txt", "a")
-            file.write(f"{payload['mensagem']}\n") # mensagem = nome do grupo
+            # payload: nome = nome do grupo, email = email do adm
+
+            """# caso dm?
+            if('nome' in payload.keys()):
+                nome = formata(payload['nome'])
+            else: 
+                nome1 = formata(payload['email']) 
+                nome2 = formata(payload['destinatario'])
+                if(nome1 < nome2):
+                    nome = nome1+nome2
+                else:
+                    nome = nome2+nome1"""
+
+            nome = formata(payload['nome'])
+            response = {
+                "quant" : 0,
+                "members" : [payload['email']],
+                "who" : [],
+                "hist" : []
+            }
+
+            file = open(f"{nome}.json", 'w')
+            json.dump(response, file)
             file.close()
 
-            aux = re.sub("\W", "", payload['mensagem'])
-            file = open(f"{aux}.txt", "a")
-            file.write(f"{payload['email']}\n") # email = adm do grupo
+            file = open("chats.txt", 'a')
+            file.write(f"{payload['nome']}\n")
             file.close()
 
         case "addGrupo":
-            aux = re.sub("\W", "", payload['mensagem'])
-            file = open(f"{aux}.txt", "a")
-            file.write(f"{payload['email']}\n") # email = novo integrante do grupo
+            # payload: nome = nome do grupo, email = user atual
+            nome = formata(payload['nome'])
+            file = open(f"{nome}.json", 'r')
+            response = json.load(file)
+            file.close()
+
+            response['members'].append(payload['email'])
+
+            file = open(f"{nome}.json", 'w')
+            json.dump(response, file)
             file.close()
 
         case "sendMsg":
-            # print(payload['mensagem'])
-            # IRC.funciona(payload['mensagem'])
+            # payload: nome = nome do grupo, email = user atual, mensagem = mensagem
+            nome = formata(payload['nome'])
+            file = open(f"{nome}.json", 'r')
+            response = json.load(file)
+            file.close()
 
-            ## ! definir grupo de destino
+            response['quant'] += 1
+            response['who'].append(payload['email'])
+            response['hist'].append(payload['mensagem'])
 
-            pass
+            file = open(f"{nome}.json", 'w')
+            json.dump(response, file)
+            file.close()
+        
+        case "getHistorico":
+            nome = formata(payload['nome'])
+            file = open(f"{nome}.json", 'r')
+            response = json.load(file)
+            file.close()
 
     return json.dumps(response)
 
-    ## ! resolver o que o payload precisa voltar pro servidor
-
-
-# if __name__ == '__main__':
-    # app.run()
-
-"""
-dicionario = {"pedido":"criaGrupo", "email":"a@gmail.com", "mensagem":"urubu$abobrinha"} # teste
+dicionario = {"pedido":"sendMsg", "email":"a@gmail.com", "mensagem":"ola grupo", "nome":"grupo legal"} # teste
 print(getJson(json.dumps(dicionario)))
-"""
