@@ -127,7 +127,55 @@ def getJson(jsonIn:json):
             response = json.load(file)
             file.close()
 
+        case "getDM":
+            ## payload: destinatario = email do destinatario, email = user atual
+
+            nome1 = formata(payload['email']) 
+            nome2 = formata(payload['destinatario'])
+            if(nome1 < nome2):
+                nome = nome1+nome2
+            else:
+                nome = nome2+nome1
+
+            try: # vê se a dm já existe
+                file = open(f"{nome}.json", 'r')
+                response = json.load(file)
+                file.close()
+            except: # cria a dm
+                response = {
+                    "quant" : 0,
+                    "members" : [payload['email'], payload['destinatario']],
+                    "who" : [],
+                    "hist" : []
+                }
+
+                file = open(f"{nome}.json", 'w')
+                json.dump(response, file)
+                file.close()
+
+        case "sendDM":
+            ## payload: destinatario = email do destinatario, email = user atual, mensagem = mensagem
+
+            nome1 = formata(payload['email']) 
+            nome2 = formata(payload['destinatario'])
+            if(nome1 < nome2):
+                nome = nome1+nome2
+            else:
+                nome = nome2+nome1            
+            
+            file = open(f"{nome}.json", 'r')
+            response = json.load(file)
+            file.close()
+
+            response['quant'] += 1
+            response['who'].append(payload['email'])
+            response['hist'].append(payload['mensagem'])
+
+            file = open(f"{nome}.json", 'w')
+            json.dump(response, file)
+            file.close()
+
     return json.dumps(response)
 
-"""dicionario = {"pedido":"sendMsg", "email":"a@gmail.com", "mensagem":"ola grupo", "nome":"grupo legal"} # teste
+"""dicionario = {"pedido":"sendDM", "email":"a@gmail.com", "mensagem":"ola grupo", "destinatario":"b@gmail.com"} # teste
 print(getJson(json.dumps(dicionario)))"""
