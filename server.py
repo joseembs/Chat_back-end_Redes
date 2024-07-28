@@ -1,6 +1,8 @@
 import socket
 import threading
 
+import app
+
 clients = {}
 
 def handle_client(client_socket, addr):
@@ -8,6 +10,7 @@ def handle_client(client_socket, addr):
         try:
             message = client_socket.recv(1024).decode('utf-8')
             if message:
+                message = app.getJson(message)
                 broadcast(message, addr)
             else:
                 remove_client(client_socket, addr)
@@ -20,7 +23,7 @@ def broadcast(message, sender_addr):
     for client_socket, addr in clients.items():
         if addr != sender_addr:
             try:
-                client_socket.send(f"{sender_addr}: {message}".encode('utf-8'))
+                client_socket.send(f"{message}".encode('utf-8'))
             except:
                 remove_client(client_socket, addr)
 
