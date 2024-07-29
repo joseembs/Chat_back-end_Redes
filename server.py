@@ -6,16 +6,32 @@ import app
 clients = {}
 
 def handle_client(client_socket, addr):
+    buffer = ""
     while True:
         try:
-            message = client_socket.recv(1024).decode('utf-8')
-            if message:
-                message = app.getJson(message)
-                broadcast(message, addr)
+            info = client_socket.recv(1024).decode("utf-8")
+            print("aqui1")
+
+            if not info:
+                remove_client(client_socket, addr)
+                break
+            print("aqui2")
+
+            buffer += info
+
+            while '\n' in buffer:
+                print("aqui3")
+                message, buffer = buffer.split('\n', 1) # para detectar o fim de cada mensagem
+
+                response = app.getJson(message)
+
+                client_socket.send((response + '\n').encode("utf-8"))
             else:
+                print("aqui4")
                 remove_client(client_socket, addr)
                 break
         except:
+            print("aqui5")
             remove_client(client_socket, addr)
             break
 
