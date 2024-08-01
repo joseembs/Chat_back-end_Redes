@@ -168,6 +168,20 @@ def getJson(jsonIn:json):
                 json.dump(response, file)
                 file.close()
 
+        case "sairGrupo":
+            ## payload: nome = nome do grupo, email = user atual
+            
+            nome = formata(payload['nome'])
+            file = open(f"{nome}.json", 'r')
+            response = json.load(file)
+            file.close()
+
+            response['members'].pop(response['members'].index(payload['email'])) # adiciona um membro
+
+            file = open(f"{nome}.json", 'w')
+            json.dump(response, file)
+            file.close()
+
     return json.dumps(response)
 
 # dicionario = {"pedido":"cadastro", "email":"j@gmail.com", "nome":"J", "local": "Brasil"} # teste
