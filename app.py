@@ -72,7 +72,7 @@ def getJson(jsonIn:json):
             file1.close()
 
         case "criaGrupo":
-            ## payload: nome = nome do grupo, email = email do adm
+            ## payload: nome = nome do grupo, email = email do adm, membros = []
 
             nome = formata(payload['nome'])
             response = { # cria json com as informações do grupo
@@ -89,6 +89,9 @@ def getJson(jsonIn:json):
             file = open("chats.txt", 'a')
             file.write(f"{payload['nome']}\n")
             file.close()
+
+            for membro in payload['membros']:
+                response['members'].append(membro)
 
         case "addGrupo":
             ## payload: nome = nome do grupo, email = user atual
