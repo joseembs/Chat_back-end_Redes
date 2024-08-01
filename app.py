@@ -82,6 +82,10 @@ def getJson(jsonIn:json):
                 "hist" : []
             }
 
+
+            for membro in payload['membros']:
+                response['members'].append(membro)
+
             file = open(f"{nome}.json", 'w')
             json.dump(response, file)
             file.close()
@@ -89,9 +93,6 @@ def getJson(jsonIn:json):
             file = open("chats.txt", 'a')
             file.write(f"{payload['nome']}\n")
             file.close()
-
-            for membro in payload['membros']:
-                response['members'].append(membro)
 
         case "addGrupo":
             ## payload: nome = nome do grupo, email = user atual
