@@ -39,6 +39,7 @@ def getJson(jsonIn:json):
                     file.close()
 
                     response['cadastrado'] = True
+                    response['dados'] = {"email" : payload['email'], "nome" : payload['nome'], "local" : payload['local']}
     
         case "login":
             
@@ -47,6 +48,7 @@ def getJson(jsonIn:json):
             file.close()
             if(payload['email'] in aux.keys()):
                 response['cadastrado'] = True
+                response['dados'] = {"email" : payload['email'], "nome" : aux[payload['email']]['nome'], "local" : aux[payload['email']]['local']}
             else:
                 response['cadastrado'] = False
 
@@ -63,7 +65,7 @@ def getJson(jsonIn:json):
             for email in file1.read().split("\n"): # lê a lista de todas as conversas
                 if(email != ""):
                     if(email in aux.keys()): # separa entre grupos e usuários
-                        response['allUsers'].append(email)
+                        response['allUsers'].append(aux[email]['nome'])
                     else:
                         response['allGroups'].append(email)
             response['allUsers'].sort()
@@ -73,18 +75,22 @@ def getJson(jsonIn:json):
 
         case "criaGrupo":
             ## payload: nome = nome do grupo, email = email do adm, membros = []
+            file = open(f"users.json", 'r')
+            aux = json.load(file)
+            file.close()
 
             nome = formata(payload['nome'])
             response = { # cria json com as informações do grupo
                 "quant" : 0,
-                "members" : [payload['email']],
+                "members" : [aux[payload['email']]['nome']],
                 "who" : [],
-                "hist" : []
+                "hist" : [],
+                "convites" : []
             }
 
 
             for membro in payload['membros']:
-                response['members'].append(membro)
+                response['members'].append(aux[membro]['nome']) # o payload vai mandar o email ou o nome dos membros?
 
             file = open(f"{nome}.json", 'w')
             json.dump(response, file)
@@ -96,14 +102,17 @@ def getJson(jsonIn:json):
 
         case "addGrupo":
             ## payload: nome = nome do grupo, membros = users a adicionar
-            
+            file = open(f"users.json", 'r')
+            aux = json.load(file)
+            file.close()
+
             nome = formata(payload['nome'])
             file = open(f"{nome}.json", 'r')
             response = json.load(file)
             file.close()
 
             for email in payload['membros']:
-                response['members'].append(email)  # adiciona um membro
+                response['members'].append(aux[email]['nome'])  # adiciona um membro
 
             file = open(f"{nome}.json", 'w')
             json.dump(response, file)
@@ -128,8 +137,12 @@ def getJson(jsonIn:json):
             response = json.load(file)
             file.close()
 
+            file = open(f"users.json", 'r')
+            aux = json.load(file)
+            file.close()
+
             response['quant'] += 1
-            response['who'].append(payload['email'])
+            response['who'].append(aux[payload['email']]['nome'])
             response['hist'].append(payload['mensagem'])
 
             file = open(f"{nome}.json", 'w')
@@ -145,6 +158,9 @@ def getJson(jsonIn:json):
 
         case "getDM":
             ## payload: nome = email do destinatario, email = user atual
+            file = open(f"users.json", 'r')
+            aux = json.load(file)
+            file.close()
 
             nome1 = formata(payload['email']) 
             nome2 = formata(payload['nome'])
@@ -160,7 +176,7 @@ def getJson(jsonIn:json):
             except: # cria a dm
                 response = {
                     "quant" : 0,
-                    "members" : [payload['email'], payload['nome']],
+                    "members" : [aux[payload['email']]['nome'], aux[payload['nome']]['nome']],
                     "who" : [],
                     "hist" : []
                 }
@@ -178,11 +194,60 @@ def getJson(jsonIn:json):
             file.close()
 
             for email in payload['membros']:
-                response['members'].remove(email) # adiciona um membro
+                response['members'].remove(email) # remove um membro
 
             file = open(f"{nome}.json", 'w')
             json.dump(response, file)
             file.close()
+
+        case "enviaConvite":
+            ## payload: nome = nome do grupo, email = email do novo membro
+
+            nome = formata(payload['nome'])
+
+            file = open(f"{nome}.json", 'r')
+            response = json.load(file)
+            file.close()
+
+            file = open(f"users.json", 'r')
+            aux = json.load(file)
+            file.close()
+
+            response['convites'].append(aux[payload['email']]['nome'])
+
+            file = open(f"{nome}.json", 'w')
+            json.dump(response, file)
+            file.close()
+
+        case "respostaConvite":
+            ## payload: nome = nome do grupo, email = email do novo membro
+
+            nome = formata(payload['nome'])
+
+            file = open(f"{nome}.json", 'r')
+            response = json.load(file)
+            file.close()
+
+            file = open(f"users.json", 'r')
+            aux = json.load(file)
+            file.close()
+
+            response['convites'].remove(aux[payload['email']]['nome'])
+            response['members'].append(aux[payload['email']]['nome'])
+
+            file = open(f"{nome}.json", 'w')
+            json.dump(response, file)
+            file.close()
+
+        case "getPerfil":
+            ## payload: email = email do usuario
+
+            file = open(f"users.json", 'r')
+            aux = json.load(file)
+            file.close()
+
+            response = aux[payload['email']]
+
 
     return json.dumps(response)
 
@@ -190,7 +255,7 @@ def getJson(jsonIn:json):
 # print(getJson(json.dumps(dicionario)))
 # {"cadastrado": true}
 
-# dicionario = {"pedido":"login", "email":"j@gmail.com"}
+# dicionario = {"pedido":"getPerfil", "email":"j@gmail.com"}
 # print(getJson(json.dumps(dicionario)))
 # {"cadastrado": true}
 
