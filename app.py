@@ -95,14 +95,15 @@ def getJson(jsonIn:json):
             file.close()
 
         case "addGrupo":
-            ## payload: nome = nome do grupo, email = user atual
+            ## payload: nome = nome do grupo, membros = users a adicionar
             
             nome = formata(payload['nome'])
             file = open(f"{nome}.json", 'r')
             response = json.load(file)
             file.close()
 
-            response['members'].append(payload['email']) # adiciona um membro
+            for email in payload['membros']:
+                response['members'].append(email)  # adiciona um membro
 
             file = open(f"{nome}.json", 'w')
             json.dump(response, file)
@@ -169,14 +170,15 @@ def getJson(jsonIn:json):
                 file.close()
 
         case "sairGrupo":
-            ## payload: nome = nome do grupo, email = user atual
+            ## payload: nome = nome do grupo, membros = users a remover
             
             nome = formata(payload['nome'])
             file = open(f"{nome}.json", 'r')
             response = json.load(file)
             file.close()
 
-            response['members'].pop(response['members'].index(payload['email'])) # adiciona um membro
+            for email in payload['membros']:
+                response['members'].remove(email) # adiciona um membro
 
             file = open(f"{nome}.json", 'w')
             json.dump(response, file)
