@@ -10,18 +10,20 @@ def handle_client(client_socket, addr):
     while True:
         try:
             info = client_socket.recv(1024).decode("utf-8")
-            
 
             if not info:
                 remove_client(client_socket, addr)
                 break
-            
 
             buffer += info
 
             while '\n' in buffer:
                 message, buffer = buffer.split('\n', 1) # para detectar o fim de cada mensagem
+
+                print(message)
                 response = app.getJson(message, client_socket)
+
+                print(response)
                 client_socket.send((response + '\n').encode("utf-8"))
             else:
                 remove_client(client_socket, addr)
@@ -32,8 +34,7 @@ def handle_client(client_socket, addr):
 
 def recebe_arquivo(client_socket, filename):
     try:
-        print("Começa a baixar")
-        # arquivo em si
+        print("Começa a baixar " + filename)
         with open(filename, 'wb') as f:
             a = 0
             while True:
