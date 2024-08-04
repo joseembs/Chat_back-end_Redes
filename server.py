@@ -46,26 +46,26 @@ def recebe_arquivo(client_socket, filename):
                     break
                 f.write(data)
         print(f"Arquivo {filename} recebido com sucesso.")
+        remove_client(client_socket, addr)
 
     
     except:
         print(f"Ocorreu um erro")
+        remove_client(client_socket, addr)
+        break
 
 def envia_arquivo(client_socket, filename):
     try:
         with open(filename, 'rb') as f:
             client_socket.sendfile(f)
         print(f"Arquivo {filename} enviado de volta com sucesso.")
+        remove_client(client_socket, addr)
     except:
         print(f"Ocorreu um erro")
+        remove_client(client_socket, addr)
+        break
 
-def broadcast(message, sender_addr):
-    for client_socket, addr in clients.items():
-        if addr != sender_addr:
-            try:
-                client_socket.send(f"{message}".encode('utf-8'))
-            except:
-                remove_client(client_socket, addr)
+
 
 def remove_client(client_socket, addr):
     if client_socket in clients:
