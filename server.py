@@ -21,7 +21,7 @@ def handle_client(client_socket, addr):
                 message, buffer = buffer.split('\n', 1) # para detectar o fim de cada mensagem
                 print(message)
 
-                response = app.getJson(message, client_socket)
+                response = app.getJson(message, client_socket, addr)
                 print(response)
 
                 client_socket.send((response + '\n').encode("utf-8"))
@@ -32,10 +32,10 @@ def handle_client(client_socket, addr):
             remove_client(client_socket, addr)
             break
 
-def recebe_arquivo(client_socket, filename):
+def recebe_arquivo(client_socket, addr, filename):
     try:
         print("Começa a baixar " + filename)
-        with open(filename, 'wb') as f:
+        with open('chat_server_files/file_storage/'+filename, 'wb') as f:
             a = 0
             while True:
                 a += 1
@@ -52,9 +52,8 @@ def recebe_arquivo(client_socket, filename):
     except:
         print(f"Ocorreu um erro")
         remove_client(client_socket, addr)
-        break
 
-def envia_arquivo(client_socket, filename):
+def envia_arquivo(client_socket, addr, filename):
     try:
         with open(filename, 'rb') as f:
             client_socket.sendfile(f)
@@ -63,9 +62,6 @@ def envia_arquivo(client_socket, filename):
     except:
         print(f"Ocorreu um erro")
         remove_client(client_socket, addr)
-        break
-
-
 
 def remove_client(client_socket, addr):
     if client_socket in clients:

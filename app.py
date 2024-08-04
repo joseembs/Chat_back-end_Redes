@@ -12,7 +12,7 @@ from server import recebe_arquivo, envia_arquivo
 def formata(string):
     return re.sub(r"\W", "", string)
 
-def getJson(jsonIn:json, socketIn):
+def getJson(jsonIn:json, socketIn, addrIn):
     payload = json.loads(jsonIn)
     response = dict()
 
@@ -24,7 +24,7 @@ def getJson(jsonIn:json, socketIn):
 
             if re.search(r"\w.*@\w+\.\w+", payload['email']): # só realiza o cadastro caso o email seja válido
                 try: # pega os usuários já cadastrados
-                    file = open("users.json", 'r')
+                    file = open("chat_server_files/users.json", 'r')
                     aux = json.load(file)
                     file.close()
 
@@ -37,11 +37,11 @@ def getJson(jsonIn:json, socketIn):
                         "local" : payload['local'],
                         "notifs" : []
                         }
-                    file = open("users.json", 'w')
+                    file = open("chat_server_files/users.json", 'w')
                     file.write(json.dumps(aux))
                     file.close()
 
-                    file = open("chats.txt", 'a')
+                    file = open("chat_server_files/chats.txt", 'a')
                     file.write(f"{payload['email']}\n")
                     file.close()
 
@@ -50,7 +50,7 @@ def getJson(jsonIn:json, socketIn):
 
         case "login":
 
-            file = open("users.json", 'r')
+            file = open("chat_server_files/users.json", 'r')
             aux = json.load(file)
             file.close()
             if(payload['email'] in aux.keys()):
@@ -61,8 +61,8 @@ def getJson(jsonIn:json, socketIn):
 
         case "atualizar":
 
-            file1 = open("chats.txt", 'r')
-            file2 = open("users.json", 'r')
+            file1 = open("chat_server_files/chats.txt", 'r')
+            file2 = open("chat_server_files/users.json", 'r')
             aux = json.load(file2)
             file2.close()
 
@@ -82,7 +82,7 @@ def getJson(jsonIn:json, socketIn):
 
         case "criaGrupo":
             ## payload: nome = nome do grupo, email = email do adm, membros = [emails]
-            file = open(f"users.json", 'r')
+            file = open(f"chat_server_files/users.json", 'r')
             aux = json.load(file)
             file.close()
 
@@ -99,29 +99,29 @@ def getJson(jsonIn:json, socketIn):
             for membro in payload['membros']:
                 response['members'].append([membro, aux[membro]['nome']]) # o payload vai mandar o email ou o nome dos membros?
 
-            file = open(f"{nome}.json", 'w')
+            file = open(f"chat_server_files/chats/{nome}.json", 'w')
             json.dump(response, file)
             file.close()
 
-            file = open("chats.txt", 'a')
+            file = open("chat_server_files/chats.txt", 'a')
             file.write(f"{payload['nome']}\n")
             file.close()
 
         case "addGrupo":
             ## payload: nome = nome do grupo, membros = users a adicionar
-            file = open(f"users.json", 'r')
+            file = open(f"chat_server_files/users.json", 'r')
             aux = json.load(file)
             file.close()
 
             nome = formata(payload['nome'])
-            file = open(f"{nome}.json", 'r')
+            file = open(f"chat_server_files/chats/{nome}.json", 'r')
             response = json.load(file)
             file.close()
 
             for membro in payload['membros']:
                 response['members'].append([membro, aux[membro]['nome']])  # adiciona um membro
 
-            file = open(f"{nome}.json", 'w')
+            file = open(f"chat_server_files/chats/{nome}.json", 'w')
             json.dump(response, file)
             file.close()
 
@@ -140,11 +140,11 @@ def getJson(jsonIn:json, socketIn):
                 else:
                     nome = nome2+nome1
 
-            file = open(f"{nome}.json", 'r')
+            file = open(f"chat_server_files/chats/{nome}.json", 'r')
             response = json.load(file)
             file.close()
 
-            file = open(f"users.json", 'r')
+            file = open(f"chat_server_files/users.json", 'r')
             aux = json.load(file)
             file.close()
 
@@ -152,20 +152,20 @@ def getJson(jsonIn:json, socketIn):
             response['who'].append([payload['email'], aux[payload['email']]['nome']])
             response['hist'].append(payload['mensagem'])
 
-            file = open(f"{nome}.json", 'w')
+            file = open(f"chat_server_files/chats/{nome}.json", 'w')
             json.dump(response, file)
             file.close()
 
         case "getGrupo":
 
             nome = formata(payload['nome'])
-            file = open(f"{nome}.json", 'r')
+            file = open(f"chat_server_files/chats/{nome}.json", 'r')
             response = json.load(file)
             file.close()
 
         case "getDM":
             ## payload: nome = email do destinatario, email = user atual
-            file = open(f"users.json", 'r')
+            file = open(f"chat_server_files/users.json", 'r')
             aux = json.load(file)
             file.close()
 
@@ -177,7 +177,7 @@ def getJson(jsonIn:json, socketIn):
                 nome = nome2+nome1
 
             try: # vê se a dm já existe
-                file = open(f"{nome}.json", 'r')
+                file = open(f"chat_server_files/chats/{nome}.json", 'r')
                 response = json.load(file)
                 response["dados"] = aux[payload['nome']]
                 file.close()
@@ -191,7 +191,7 @@ def getJson(jsonIn:json, socketIn):
                 }
 
 
-                file = open(f"{nome}.json", 'w')
+                file = open(f"chat_server_files/chats/{nome}.json", 'w')
                 json.dump(response, file)
                 file.close()
 
@@ -201,7 +201,7 @@ def getJson(jsonIn:json, socketIn):
             ## payload: nome = nome do grupo, membros = users a remover
 
             nome = formata(payload['nome'])
-            file = open(f"{nome}.json", 'r')
+            file = open(f"chat_server_files/chats/{nome}.json", 'r')
             response = json.load(file)
             file.close()
 
@@ -210,7 +210,7 @@ def getJson(jsonIn:json, socketIn):
                     if membro in info:
                         response['members'].remove(info) # remove um membro
 
-            file = open(f"{nome}.json", 'w')
+            file = open(f"chat_server_files/chats/{nome}.json", 'w')
             json.dump(response, file)
             file.close()
 
@@ -220,26 +220,26 @@ def getJson(jsonIn:json, socketIn):
             nome = formata(payload['nome'])
 
             # coloca no json do grupo
-            file = open(f"{nome}.json", 'r')
+            file = open(f"chat_server_files/chats/{nome}.json", 'r')
             aux = json.load(file)
             file.close()
 
             aux['convites'].append(payload['email'])
 
-            file = open(f"{nome}.json", 'w')
+            file = open(f"chat_server_files/chats/{nome}.json", 'w')
             json.dump(aux, file)
             file.close()
 
             #coloca no json do adm
             adm = aux['members'][0][0]
 
-            file = open(f"users.json", 'r')
+            file = open(f"chat_server_files/users.json", 'r')
             users = json.load(file)
             file.close()
 
-            users[adm]['notifs'].append([payload['email'], users[payload['email']]['nome']], payload['nome'])
+            users[adm]['notifs'].append([payload['email'], users[payload['email']]['nome'], payload['nome']])
 
-            file = open(f"users.json", 'w')
+            file = open(f"chat_server_files/users.json", 'w')
             json.dump(users, file)
             file.close()
 
@@ -250,11 +250,11 @@ def getJson(jsonIn:json, socketIn):
 
             nome = formata(payload['nome'])
 
-            file = open(f"{nome}.json", 'r')
+            file = open(f"chat_server_files/chats/{nome}.json", 'r')
             aux = json.load(file)
             file.close()
 
-            file = open(f"users.json", 'r')
+            file = open(f"chat_server_files/users.json", 'r')
             users = json.load(file)
             file.close()
 
@@ -263,15 +263,15 @@ def getJson(jsonIn:json, socketIn):
             if(payload['resposta']):
                 aux['members'].append([payload['email'], users[payload['email']]['nome']])
 
-            file = open(f"{nome}.json", 'w')
+            file = open(f"chat_server_files/chats/{nome}.json", 'w')
             json.dump(aux, file)
             file.close()
 
             adm = aux['members'][0][0]
 
-            users[adm]['notifs'].remove([payload['email'], aux[payload['email']]['nome']], payload['nome'])
+            users[adm]['notifs'].remove([payload['email'], users[payload['email']]['nome'], payload['nome']])
 
-            file = open(f"users.json", 'w')
+            file = open(f"chat_server_files/users.json", 'w')
             json.dumps(users, file)
             file.close()
 
@@ -280,18 +280,18 @@ def getJson(jsonIn:json, socketIn):
         case "getPerfil":
             ## payload: email = email do usuario
 
-            file = open(f"users.json", 'r')
+            file = open(f"chat_server_files/users.json", 'r')
             aux = json.load(file)
             file.close()
 
             response = aux[payload['email']]
 
         case "uploadFile":
-            recebe_arquivo(socketIn, payload['file'])
+            recebe_arquivo(socketIn, addrIn, payload['file'])
             response = None
 
         case "downloadFile":
-            envia_arquivo(socketIn, payload['file'])
+            envia_arquivo(socketIn, addrIn, payload['file'])
             response = None
 
     if response:
