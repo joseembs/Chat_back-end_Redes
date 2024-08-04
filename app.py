@@ -182,7 +182,6 @@ def getJson(jsonIn:json, socketIn):
                 response["dados"] = aux[payload['nome']]
                 file.close()
             except: # cria a dm
-                print("?")
                 response = {
                     "quant" : 0,
                     "members" : [[payload['email'], aux[payload['email']]['nome']], [payload['nome'], aux[payload['nome']]['nome']]],
@@ -237,7 +236,7 @@ def getJson(jsonIn:json, socketIn):
             users = json.load(file)
             file.close()
 
-            users[adm]['notifs'].append([payload['email'], users[payload['email']]['nome']], payload['nome'])
+            users[adm]['notifs'].append([payload['email'], users[payload['email']]['nome'], payload['nome']])
 
             file = open(f"users.json", 'w')
             json.dump(users, file)
@@ -269,7 +268,7 @@ def getJson(jsonIn:json, socketIn):
 
             adm = aux['members'][0][0]
 
-            users[adm]['notifs'].remove([payload['email'], aux[payload['email']]['nome']], payload['nome'])
+            users[adm]['notifs'].remove([payload['email'], aux[payload['email']]['nome'], payload['nome']])
 
             file = open(f"users.json", 'w')
             json.dumps(users, file)
