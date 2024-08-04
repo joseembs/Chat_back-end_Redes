@@ -266,35 +266,3 @@ def getJson(jsonIn:json, socketIn):
         return json.dumps(response)
     else:
         return
-
-# dicionario = {"pedido":"cadastro", "email":"j@gmail.com", "nome":"J", "local": "Brasil"} # teste
-# print(getJson(json.dumps(dicionario)))
-# {"cadastrado": true}
-
-# dicionario = {"pedido":"getPerfil", "email":"j@gmail.com"}
-# print(getJson(json.dumps(dicionario)))
-# {"cadastrado": true}
-
-# dicionario = {"pedido":"atualizar"}
-# print(getJson(json.dumps(dicionario)))
-# {"allUsers": ["j@gmail.com"], "allGroups": []}
-
-# dicionario = {"pedido":"cadastro", "email":"o@gmail.com", "nome":"O", "local": "EUA"}
-# print(getJson(json.dumps(dicionario)))
-# {"cadastrado": true}
-
-# dicionario = {"pedido":"atualizar"}
-# print(getJson(json.dumps(dicionario)))
-# {"allUsers": ["j@gmail.com", "o@gmail.com"], "allGroups": []}
-
-# dicionario = {"pedido": "getDM", "email": "j@gmail.com", "destinatario": "o@gmail.com"}
-# print(getJson(json.dumps(dicionario)))
-# {"quant": 0, "members": ["j@gmail.com", "o@gmail.com"], "who": [], "hist": []}
-
-# dicionario = {"pedido": "sendDM", "destinatario": "o@gmail.com", "email": "j@gmail.com", "mensagem": "oi"} // antigo
-# print(getJson(json.dumps(dicionario)))
-# {"quant": 1, "members": ["j@gmail.com", "o@gmail.com"], "who": ["j@gmail.com"], "hist": ["oi"]}
-
-# dicionario = {"pedido": "sendMsg", "nome": "j@gmail.com", "email": "o@gmail.com", "mensagem": "eae", "grupo": False} // novo
-# print(getJson(json.dumps(dicionario)))
-# {"quant": 2, "members": ["j@gmail.com", "o@gmail.com"], "who": ["j@gmail.com", "o@gmail.com"], "hist": ["oi", "eae"]}
