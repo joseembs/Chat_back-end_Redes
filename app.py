@@ -267,12 +267,10 @@ def getJson(jsonIn:json, socketIn, addrIn):
             json.dump(aux, file)
             file.close()
 
-            adm = aux['members'][0][0]
-
-            users[adm]['notifs'].remove([payload['email'], users[payload['email']]['nome'], payload['nome']])
+            users[payload['admin']]['notifs'].remove([payload['email'], users[payload['email']]['nome'], payload['nome']])
 
             file = open(f"chat_server_files/users.json", 'w')
-            json.dumps(users, file)
+            json.dump(users, file)
             file.close()
 
             response = None
