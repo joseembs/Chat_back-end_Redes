@@ -16,9 +16,9 @@ def getJson(jsonIn:json):
     match payload['pedido']:
 
         case "cadastro":
-            
+
             response['cadastrado'] = False
-            
+
             if re.search(r"\w.*@\w+\.\w+", payload['email']): # só realiza o cadastro caso o email seja válido
                 try: # pega os usuários já cadastrados
                     file = open("users.json", 'r')
@@ -27,22 +27,22 @@ def getJson(jsonIn:json):
 
                 except: # caso não haja usuários
                     aux = {}
-                
+
                 if(payload['email'] not in aux.keys()): # evita o cadastro de um email repetido
                     aux[payload['email']] = {"nome" : payload['nome'], "local" : payload['local']}
                     file = open("users.json", 'w')
                     file.write(json.dumps(aux))
                     file.close()
-                    
+
                     file = open("chats.txt", 'a')
                     file.write(f"{payload['email']}\n")
                     file.close()
 
                     response['cadastrado'] = True
                     response['dados'] = {"email" : payload['email'], "nome" : payload['nome'], "local" : payload['local']}
-    
+
         case "login":
-            
+
             file = open("users.json", 'r')
             aux = json.load(file)
             file.close()
@@ -53,28 +53,28 @@ def getJson(jsonIn:json):
                 response['cadastrado'] = False
 
         case "atualizar":
-            
+
             file1 = open("chats.txt", 'r')
             file2 = open("users.json", 'r')
             aux = json.load(file2)
             file2.close()
 
-            response['allUsers'] = []
+            response['allUsers'] = {}
             response['allGroups'] = []
 
             for email in file1.read().split("\n"): # lê a lista de todas as conversas
                 if(email != ""):
                     if(email in aux.keys()): # separa entre grupos e usuários
-                        response['allUsers'].append(aux[email]['nome'])
+                        response['allUsers'].update({email: aux[email]['nome']})
                     else:
                         response['allGroups'].append(email)
-            response['allUsers'].sort()
+            response['allUsers'] = dict(sorted(response['allUsers'].items(),key=lambda item: item[1]))
             response['allGroups'].sort()
-            
+
             file1.close()
 
         case "criaGrupo":
-            ## payload: nome = nome do grupo, email = email do adm, membros = []
+            ## payload: nome = nome do grupo, email = email do adm, membros = [emails]
             file = open(f"users.json", 'r')
             aux = json.load(file)
             file.close()
@@ -82,7 +82,7 @@ def getJson(jsonIn:json):
             nome = formata(payload['nome'])
             response = { # cria json com as informações do grupo
                 "quant" : 0,
-                "members" : [aux[payload['email']]['nome']],
+                "members" : [[payload['email'], aux[payload['email']]['nome']]],
                 "who" : [],
                 "hist" : [],
                 "convites" : []
@@ -90,7 +90,7 @@ def getJson(jsonIn:json):
 
 
             for membro in payload['membros']:
-                response['members'].append(aux[membro]['nome']) # o payload vai mandar o email ou o nome dos membros?
+                response['members'].append([membro, aux[membro]['nome']]) # o payload vai mandar o email ou o nome dos membros?
 
             file = open(f"{nome}.json", 'w')
             json.dump(response, file)
@@ -111,8 +111,8 @@ def getJson(jsonIn:json):
             response = json.load(file)
             file.close()
 
-            for email in payload['membros']:
-                response['members'].append(aux[email]['nome'])  # adiciona um membro
+            for membro in payload['membros']:
+                response['members'].append([membro, aux[membro]['nome']])  # adiciona um membro
 
             file = open(f"{nome}.json", 'w')
             json.dump(response, file)
@@ -142,7 +142,7 @@ def getJson(jsonIn:json):
             file.close()
 
             response['quant'] += 1
-            response['who'].append(aux[payload['email']]['nome'])
+            response['who'].append([payload['email'], aux[payload['email']]['nome']])
             response['hist'].append(payload['mensagem'])
 
             file = open(f"{nome}.json", 'w')
@@ -150,7 +150,7 @@ def getJson(jsonIn:json):
             file.close()
 
         case "getGrupo":
-            
+
             nome = formata(payload['nome'])
             file = open(f"{nome}.json", 'r')
             response = json.load(file)
@@ -162,7 +162,7 @@ def getJson(jsonIn:json):
             aux = json.load(file)
             file.close()
 
-            nome1 = formata(payload['email']) 
+            nome1 = formata(payload['email'])
             nome2 = formata(payload['nome'])
             if(nome1 < nome2):
                 nome = nome1+nome2
@@ -172,29 +172,38 @@ def getJson(jsonIn:json):
             try: # vê se a dm já existe
                 file = open(f"{nome}.json", 'r')
                 response = json.load(file)
+                response["dados"] = aux[payload['nome']]
                 file.close()
             except: # cria a dm
+                print("?")
                 response = {
                     "quant" : 0,
-                    "members" : [aux[payload['email']]['nome'], aux[payload['nome']]['nome']],
+                    "members" : [[payload['email'], aux[payload['email']]['nome']], [payload['nome'], aux[payload['nome']]['nome']]],
                     "who" : [],
                     "hist" : []
                 }
+                print("??")
+
 
                 file = open(f"{nome}.json", 'w')
                 json.dump(response, file)
                 file.close()
 
+                response["dados"] = aux[payload['nome']]
+                print("???")
+
         case "sairGrupo":
             ## payload: nome = nome do grupo, membros = users a remover
-            
+
             nome = formata(payload['nome'])
             file = open(f"{nome}.json", 'r')
             response = json.load(file)
             file.close()
 
-            for email in payload['membros']:
-                response['members'].remove(email) # remove um membro
+            for membro in payload['membros']:
+                for info in response['members']: # info = [email, nome]
+                    if membro in info:
+                        response['members'].remove(info) # remove um membro
 
             file = open(f"{nome}.json", 'w')
             json.dump(response, file)
@@ -209,11 +218,7 @@ def getJson(jsonIn:json):
             response = json.load(file)
             file.close()
 
-            file = open(f"users.json", 'r')
-            aux = json.load(file)
-            file.close()
-
-            response['convites'].append(aux[payload['email']]['nome'])
+            response['convites'].append(payload['email'])
 
             file = open(f"{nome}.json", 'w')
             json.dump(response, file)
@@ -232,8 +237,8 @@ def getJson(jsonIn:json):
             aux = json.load(file)
             file.close()
 
-            response['convites'].remove(aux[payload['email']]['nome'])
-            response['members'].append(aux[payload['email']]['nome'])
+            response['convites'].remove(payload['email'])
+            response['members'].append([payload['email'], aux[payload['email']]['nome']])
 
             file = open(f"{nome}.json", 'w')
             json.dump(response, file)
