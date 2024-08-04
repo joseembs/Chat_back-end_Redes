@@ -15,7 +15,7 @@ def handle_client(client_socket, addr):
             if not info:
                 remove_client(client_socket, addr)
                 break
-            print("aqui2")
+            
 
             buffer += info
 
@@ -27,7 +27,6 @@ def handle_client(client_socket, addr):
                 remove_client(client_socket, addr)
                 break
         except:
-            print("aqui5")
             remove_client(client_socket, addr)
             break
 
