@@ -35,6 +35,30 @@ def handle_client(client_socket, addr):
             remove_client(client_socket, addr)
             break
 
+def recebe_arquivo(client_socket):
+    try:
+        # Receber o nome do arquivo
+        filename = client_socket.recv(1024).decode()
+        print(f"Recebendo arquivo: {filename}")
+
+        # Receber o arquivo
+        with open(filename, 'wb') as f:
+            while True:
+                data = client_socket.recv(1024)
+                if not data:
+                    break
+                f.write(data)
+        print(f"Arquivo {filename} recebido com sucesso.")
+
+        """""
+        # Enviar o arquivo de volta
+        with open(filename, 'rb') as f:
+            client_socket.sendfile(f)
+        print(f"Arquivo {filename} enviado de volta com sucesso.")
+        """""
+    except:
+        print(f"deu erro :/")
+
 def broadcast(message, sender_addr):
     for client_socket, addr in clients.items():
         if addr != sender_addr:
