@@ -14,7 +14,7 @@ def formata(string):
 
 def getJson(jsonIn:json, socketIn):
     payload = json.loads(jsonIn)
-    response = {}
+    response = dict()
 
     match payload['pedido']:
 
@@ -185,7 +185,6 @@ def getJson(jsonIn:json, socketIn):
                     "who" : [],
                     "hist" : []
                 }
-                print("??")
 
 
                 file = open(f"{nome}.json", 'w')
@@ -193,7 +192,6 @@ def getJson(jsonIn:json, socketIn):
                 file.close()
 
                 response["dados"] = aux[payload['nome']]
-                print("???")
 
         case "sairGrupo":
             ## payload: nome = nome do grupo, membros = users a remover
@@ -258,16 +256,16 @@ def getJson(jsonIn:json, socketIn):
 
         case "uploadFile":
             recebe_arquivo(socketIn, payload['file'])
-
-            # response = {"result": "foi"}
+            response = None
 
         case "downloadFile":
             envia_arquivo(socketIn, payload['file'])
+            response = None
 
-            # response = {"result": "foi"}
-
-
-    return json.dumps(response)
+    if response:
+        return json.dumps(response)
+    else:
+        return
 
 # dicionario = {"pedido":"cadastro", "email":"j@gmail.com", "nome":"J", "local": "Brasil"} # teste
 # print(getJson(json.dumps(dicionario)))
