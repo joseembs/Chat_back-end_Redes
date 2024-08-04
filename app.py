@@ -32,7 +32,11 @@ def getJson(jsonIn:json, socketIn):
                     aux = {}
 
                 if(payload['email'] not in aux.keys()): # evita o cadastro de um email repetido
-                    aux[payload['email']] = {"nome" : payload['nome'], "local" : payload['local']}
+                    aux[payload['email']] = {
+                        "nome" : payload['nome'], 
+                        "local" : payload['local'],
+                        "notifs" : []
+                        }
                     file = open("users.json", 'w')
                     file.write(json.dumps(aux))
                     file.close()
@@ -215,15 +219,31 @@ def getJson(jsonIn:json, socketIn):
 
             nome = formata(payload['nome'])
 
+            # coloca no json do grupo
             file = open(f"{nome}.json", 'r')
-            response = json.load(file)
+            aux = json.load(file)
             file.close()
 
-            response['convites'].append(payload['email'])
+            aux['convites'].append(payload['email'])
 
             file = open(f"{nome}.json", 'w')
-            json.dump(response, file)
+            json.dump(aux, file)
             file.close()
+
+            #coloca no json do adm
+            adm = aux['members'][0][0]
+
+            file = open(f"users.json", 'r')
+            users = json.load(file)
+            file.close()
+
+            users[adm]['notifs'].append([payload['email'], users[payload['email']]['nome']], payload['nome'])
+
+            file = open(f"users.json", 'w')
+            json.dump(users, file)
+            file.close()
+
+            response = None
 
         case "respostaConvite":
             ## payload: nome = nome do grupo, email = email do novo membro
@@ -231,19 +251,31 @@ def getJson(jsonIn:json, socketIn):
             nome = formata(payload['nome'])
 
             file = open(f"{nome}.json", 'r')
-            response = json.load(file)
-            file.close()
-
-            file = open(f"users.json", 'r')
             aux = json.load(file)
             file.close()
 
-            response['convites'].remove(payload['email'])
-            response['members'].append([payload['email'], aux[payload['email']]['nome']])
+            file = open(f"users.json", 'r')
+            users = json.load(file)
+            file.close()
+
+            aux['convites'].remove(payload['email'])
+
+            if(payload['resposta']):
+                aux['members'].append([payload['email'], users[payload['email']]['nome']])
 
             file = open(f"{nome}.json", 'w')
-            json.dump(response, file)
+            json.dump(aux, file)
             file.close()
+
+            adm = aux['members'][0][0]
+
+            users[adm]['notifs'].remove([payload['email'], aux[payload['email']]['nome']], payload['nome'])
+
+            file = open(f"users.json", 'w')
+            json.dumps(users, file)
+            file.close()
+
+            response = None
 
         case "getPerfil":
             ## payload: email = email do usuario
