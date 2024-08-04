@@ -6,10 +6,13 @@
 import json
 import re
 
+from server import recebe_arquivo, envia_arquivo
+
+
 def formata(string):
     return re.sub(r"\W", "", string)
 
-def getJson(jsonIn:json):
+def getJson(jsonIn:json, socketIn):
     payload = json.loads(jsonIn)
     response = {}
 
@@ -252,6 +255,16 @@ def getJson(jsonIn:json):
             file.close()
 
             response = aux[payload['email']]
+
+        case "uploadFile":
+            recebe_arquivo(socketIn, payload['file'])
+
+            # response = {"result": "foi"}
+
+        case "downloadFile":
+            envia_arquivo(socketIn, payload['file'])
+
+            # response = {"result": "foi"}
 
 
     return json.dumps(response)

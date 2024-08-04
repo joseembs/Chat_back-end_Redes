@@ -22,9 +22,9 @@ def handle_client(client_socket, addr):
             while '\n' in buffer:
                 print("aqui3")
                 message, buffer = buffer.split('\n', 1) # para detectar o fim de cada mensagem
-
-                response = app.getJson(message)
-
+                print("aqui6")
+                response = app.getJson(message, client_socket)
+                print("aqui7")
                 client_socket.send((response + '\n').encode("utf-8"))
             else:
                 print("aqui4")
@@ -35,17 +35,21 @@ def handle_client(client_socket, addr):
             remove_client(client_socket, addr)
             break
 
-def recebe_arquivo(client_socket):
+def recebe_arquivo(client_socket, filename):
     try:
-        # Receber o nome do arquivo
-        filename = client_socket.recv(1024).decode()
-        print(f"Recebendo arquivo: {filename}")
-
-        # Receber o arquivo
+        # nome do arquivo
+        # filename = client_socket.recv(1024).decode()
+        # print(f"Recebendo arquivo: {filename}")
+        print("começa a baixar")
+        # arquivo em si
         with open(filename, 'wb') as f:
+            a = 0
             while True:
+                a += 1
+                print(a)
                 data = client_socket.recv(1024)
                 if not data:
+                    print("b")
                     break
                 f.write(data)
         print(f"Arquivo {filename} recebido com sucesso.")
@@ -58,6 +62,14 @@ def recebe_arquivo(client_socket):
         """""
     except:
         print(f"deu erro :/")
+
+def envia_arquivo(client_socket, filename):
+    try:
+        with open(filename, 'rb') as f:
+            client_socket.sendfile(f)
+        print(f"Arquivo {filename} enviado de volta com sucesso.")
+    except:
+        print(f"deu erro :(")
 
 def broadcast(message, sender_addr):
     for client_socket, addr in clients.items():
