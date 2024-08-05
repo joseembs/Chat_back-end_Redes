@@ -1,7 +1,9 @@
 import socket
 import threading
 
-import app
+import api
+
+ip = '26.212.49.229';
 
 def handle_client(client_socket, addr):
     buffer = ""
@@ -67,7 +69,7 @@ def remove_client(client_socket, addr):
 
 def main():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.bind(('0.0.0.0', 12345))
+    server.bind(('26.212.49.229', 12345))
     server.listen(5)
     print("Servidor iniciado e aguardando conexões...")
 
