@@ -3,7 +3,7 @@ import threading
 
 import api
 
-ip = '26.212.49.229';
+ip = '26.212.49.229'; # '127.0.0.1'
 
 def handle_client(client_socket, addr):
     buffer = ""
@@ -19,7 +19,7 @@ def handle_client(client_socket, addr):
                 message, buffer = buffer.split('\n', 1) # para detectar o fim de cada mensagem
                 print(message)
 
-                response = app.getJson(message, client_socket, addr)
+                response = api.getJson(message, client_socket, addr)
                 print(response)
 
                 client_socket.send((response + '\n').encode("utf-8"))
