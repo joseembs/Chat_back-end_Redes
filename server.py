@@ -3,21 +3,17 @@ import threading
 
 import app
 
-clients = {}
-
 def handle_client(client_socket, addr):
     buffer = ""
-    while True:
-        try:
-            info = client_socket.recv(1024).decode("utf-8")
+    try:
+        info = client_socket.recv(1024).decode("utf-8")
 
-            if not info:
-                remove_client(client_socket, addr)
-                break
-
+        if not info:
+            remove_client(client_socket, addr)
+        else:
             buffer += info
 
-            while '\n' in buffer:
+            if '\n' in buffer:
                 message, buffer = buffer.split('\n', 1) # para detectar o fim de cada mensagem
                 print(message)
 
@@ -25,29 +21,29 @@ def handle_client(client_socket, addr):
                 print(response)
 
                 client_socket.send((response + '\n').encode("utf-8"))
+                remove_client(client_socket, addr)
             else:
                 remove_client(client_socket, addr)
-                break
-        except:
-            remove_client(client_socket, addr)
-            break
+
+    except:
+        remove_client(client_socket, addr)
+
 
 def recebe_arquivo(client_socket, addr, filename):
     try:
         print("Começa a baixar " + filename)
-        with open('chat_server_files/file_storage/'+filename, 'wb') as f:
+        with open(filename, 'wb') as f:
             a = 0
             while True:
                 a += 1
                 print(a)
                 data = client_socket.recv(1024)
                 if not data:
-                    print("b")
+                    print("end data")
                     break
                 f.write(data)
         print(f"Arquivo {filename} recebido com sucesso.")
         remove_client(client_socket, addr)
-
     
     except:
         print(f"Ocorreu um erro")
@@ -64,10 +60,10 @@ def envia_arquivo(client_socket, addr, filename):
         remove_client(client_socket, addr)
 
 def remove_client(client_socket, addr):
-    if client_socket in clients:
-        client_socket.close()
-        del clients[client_socket]
-        print(f"Conexão com {addr} fechada")
+    print(f"Conexão com {addr} fechada")
+    client_socket.close()
+
+
 
 def main():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -78,7 +74,6 @@ def main():
     while True:
         client_socket, addr = server.accept()
         print(f"Conexão estabelecida com {addr}")
-        clients[client_socket] = addr
         thread = threading.Thread(target=handle_client, args=(client_socket, addr))
         thread.start()
 
