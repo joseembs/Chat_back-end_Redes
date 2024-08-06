@@ -3,7 +3,7 @@ import threading
 
 import api
 
-ip = '26.212.49.229'; # '127.0.0.1'
+ip = '26.212.49.229' # '127.0.0.1'
 
 def handle_client(client_socket, addr):
     buffer = ""
